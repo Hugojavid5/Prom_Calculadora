@@ -5,16 +5,37 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.hugo.calculadora.databinding.ActivityMainBinding
 
+/**
+ * La actividad principal para la calculadora.
+ * Implementa View.OnClickListener para gestionar eventos de los botones.
+ */
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+
+    // View binding para acceder a los elementos de la UI de manera eficiente.
     private lateinit var binding: ActivityMainBinding
-    private var firstNumber=0.0
-    private var secondNumber=0.0
-    private var operation: String?=null
+
+    // Primer número en la operación.
+    private var firstNumber = 0.0
+
+    // Segundo número en la operación.
+    private var secondNumber = 0.0
+
+    // Operación matemática seleccionada.
+    private var operation: String? = null
+
+    /**
+     * Método llamado al crear la actividad.
+     * Inicializa el binding y configura los listeners para los botones de la calculadora.
+     *
+     * @param savedInstanceState Estado de la instancia de la actividad.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // Inicializa `binding` utilizando el método `inflate`
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)  // Usa `binding.root` en lugar de `R.layout.activity_main`
+
         // Inicialización de botones
         operation = null
         binding.btn0.setOnClickListener(this)
@@ -35,8 +56,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnIgual.setOnClickListener(this)
         binding.btnComa.setOnClickListener(this)
     }
+
+    /**
+     * Método llamado al hacer clic en cualquiera de los botones de la calculadora.
+     *
+     * @param view La vista del botón que se hizo clic.
+     */
     override fun onClick(view: View?) {
-        when(view){
+        when (view) {
             binding.btn0 -> onNumberPresses("0")
             binding.btn1 -> onNumberPresses("1")
             binding.btn2 -> onNumberPresses("2")
@@ -56,28 +83,53 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             binding.btnBorrar -> onClearPressed()
         }
     }
-    private fun onNumberPresses(number:String){
+
+    /**
+     * Llamado al presionar un botón numérico.
+     *
+     * @param number El número presionado como una cadena.
+     */
+    private fun onNumberPresses(number: String) {
         renderScreen(number)
         checkOperation()
     }
-    private fun renderScreen(number:String){
-        val result:String = if(binding.screen.text=="0" && number!=",")
-            number
+
+    /**
+     * Renderiza el número en la pantalla de la calculadora.
+     *
+     * @param number El número a mostrar.
+     */
+    private fun renderScreen(number: String) {
+        val result: String = if (binding.screen.text == "0" && number != ",") number else "${binding.screen.text}$number"
+        binding.screen.text = result
+    }
+
+    /**
+     * Verifica si una operación está seleccionada y asigna valores a `firstNumber` o `secondNumber`.
+     */
+    private fun checkOperation() {
+        if (operation == null)
+            firstNumber = binding.screen.text.toString().toDouble()
         else
-            "${binding.screen.text}$number"
-        binding.screen.text=result
+            secondNumber = binding.screen.text.toString().toDouble()
     }
-    private fun checkOperation(){
-        if(operation==null)
-            firstNumber=binding.screen.text.toString().toDouble()
-        else
-            secondNumber=binding.screen.text.toString().toDouble()
+
+    /**
+     * Llamado al presionar un botón de operación (+, -, *, /).
+     * Establece la operación seleccionada y reinicia la pantalla.
+     *
+     * @param operation La operación seleccionada como una cadena.
+     */
+    private fun onOperationPresed(operation: String) {
+        this.operation = operation
+        firstNumber = binding.screen.text.toString().toDouble()
+        binding.screen.text = "0"
     }
-    private fun onOperationPresed(operation:String){
-        this.operation=operation
-        firstNumber=binding.screen.text.toString().toDouble()
-        binding.screen.text="0"
-    }
+
+    /**
+     * Calcula el resultado basado en los números ingresados y la operación seleccionada.
+     * Muestra el resultado en la pantalla.
+     */
     private fun onEqualPressed() {
         // Evita dividir por cero
         if (operation == "/" && secondNumber == 0.0) {
@@ -91,10 +143,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             "/" -> firstNumber / secondNumber
             else -> 0.0
         }
+
         // Reset de operación y asignación de resultado
         operation = null
         firstNumber = result
         secondNumber = 0.0
+
         // Mostrar resultado en pantalla
         binding.screen.text = if (result.toString().endsWith(".0")) {
             result.toInt().toString()
@@ -102,9 +156,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             "%.2f".format(result)
         }
     }
-    private fun onClearPressed(){
-        binding.screen.text="0"
-        firstNumber=0.0
-        secondNumber=0.0
+
+    /**
+     * Reinicia los valores de la calculadora y borra la pantalla.
+     */
+    private fun onClearPressed() {
+        binding.screen.text = "0"
+        firstNumber = 0.0
+        secondNumber = 0.0
     }
 }
